@@ -1,6 +1,5 @@
-
 from typing import Protocol, Optional
-from app.domain.models import Monitor
+from app.domain.models import Monitor, User
 
 
 class MonitorRepository(Protocol):
@@ -18,3 +17,18 @@ class MonitorRepository(Protocol):
 
     async def delete(self, monitor_id: int) -> bool:
         ...
+
+class UserRepository(Protocol):
+    async def add(self, user: User) -> User:
+        ...
+
+    async def get(self, user_id: int) -> Optional[User]:
+        ...
+
+    async def get_by_email(self, email: str) -> Optional[User]:
+        ...
+
+    async def update(self, user: User) -> User:
+        ...
+
+    

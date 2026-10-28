@@ -1,25 +1,26 @@
 from typing import Optional
-from app.domain.models import Monitor
-from app.repositories.base import MonitorRepository
+
+from app.domain.models import Monitor, User
+from app.repositories.base import MonitorRepository, UserRepository
+
 
 class InMemoryMonitorRepository(MonitorRepository):
     def __init__(self) -> None:
         self._items: dict[int, Monitor] = {}
         self._next_id = 1
 
-    def reset(self):
+    def reset(self) -> None:
         self._items.clear()
         self._next_id = 1
-        
+
     async def add(self, monitor: Monitor) -> Monitor:
         monitor.id = self._next_id
         self._items[monitor.id] = monitor
         self._next_id += 1
         return monitor
-        
+
     async def get(self, monitor_id: int) -> Optional[Monitor]:
         return self._items.get(monitor_id)
-
 
     async def list_by_owner(self, owner_id: int) -> list[Monitor]:
         return [
@@ -35,10 +36,31 @@ class InMemoryMonitorRepository(MonitorRepository):
     async def delete(self, monitor_id: int) -> bool:
         return self._items.pop(monitor_id, None) is not None
 
-    
-        
 
+class InMemoryUserRepository(UserRepository):
+    def __init__(self) -> None:
+        self._items: dict[int, User] = {}
+        self._next_id = 1
 
+    def reset(self) -> None:
+        self._items.clear()
+        self._next_id = 1
 
-    
-    
+    async def add(self, user: User) -> User:
+        user.id = self._next_id
+        self._items[user.id] = user
+        self._next_id += 1
+        return user
+
+    async def get(self, user_id: int) -> Optional[User]:
+        return self._items.get(user_id)
+
+    async def get_by_email(self, email: str) -> Optional[User]:
+        for user in self._items.values():
+            if user.email == email:
+                return user
+        return None
+
+    async def update(self, user: User) -> User:
+        self._items[user.id] = user
+        return user
