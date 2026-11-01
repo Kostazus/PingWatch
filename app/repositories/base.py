@@ -1,5 +1,5 @@
 from typing import Protocol, Optional
-from app.domain.models import Monitor, User
+from app.domain.models import Monitor, User, Incident
 
 
 class MonitorRepository(Protocol):
@@ -31,4 +31,20 @@ class UserRepository(Protocol):
     async def update(self, user: User) -> User:
         ...
 
-    
+class IncidentRepository(Protocol):
+    async def add(self, incident: Incident) -> Incident:
+        ...
+
+    async def get(self, incident_id: int) -> Optional[Incident]:
+        ...
+
+    async def get_open_for_monitor(self, monitor_id: int) -> Optional[Incident]:
+        ...
+
+    async def update(self, incident: Incident) -> Incident:
+        ...
+
+    async def list_for_monitor(self, monitor_id: int) -> list[Incident]:
+        ...
+
+

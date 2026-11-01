@@ -1,7 +1,7 @@
 from typing import Optional
 
-from app.domain.models import Monitor, User
-from app.repositories.base import MonitorRepository, UserRepository
+from app.domain.models import Monitor, User, Incident
+from app.repositories.base import MonitorRepository, UserRepository, IncidentRepository
 
 
 class InMemoryMonitorRepository(MonitorRepository):
@@ -64,3 +64,42 @@ class InMemoryUserRepository(UserRepository):
     async def update(self, user: User) -> User:
         self._items[user.id] = user
         return user
+
+class InMemoryIncidentRepository(IncidentRepository):
+    def __init__(self) -> None:
+        self._items: dict[int, Incident] = {}
+        self._next_id = 1
+
+    def reset(self):
+        self._items.clear()
+        self._next_id = 1
+
+    async def add(self, incident: Incident):
+        incident_id = self._next_id
+        self._items[incident_id] = incident
+        self._next_id += 1
+        return incident
+
+    async def get(self, incident_id: int):
+        return self._items.get(incident_id)
+
+    async def get_open_for_monitor(self, monitor_id: int):
+        for incident in self._items.values():
+            if incident.monitor_id == monitor_id and incident.resolved_at is None:
+                return incident
+
+        return None
+
+    async def update(self, incident):
+        self._items[incident.id] = incident
+        return incident
+
+    async def list_for_monitor(self, monitor_id: int):
+        incidents = []
+
+        for incident in self._items.values():
+            if incident.monitor_id == monitor_id:
+                incidents.append(incident)
+        return sorted(incidents, key=lambda incident: incident.id)
+        
+        
